@@ -1,132 +1,149 @@
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Helmet } from 'react-helmet';
 import { Button } from '@/components/ui/button';
+import { CheckCircle, Repeat, Trash2, TrendingUp, ChevronDown } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import { useToast } from '@/components/ui/use-toast';
-import { CheckCircle2 } from 'lucide-react';
 
-function PromotionPanelPage() {
-  const { toast } = useToast();
-  const [students, setStudents] = useState([
-    { id: 1, name: 'Aarav Sharma', currentStd: '9', currentClass: 'A', promoted: false, nextStd: '10', nextClass: 'A' },
-    { id: 2, name: 'Priya Patel', currentStd: '9', currentClass: 'A', promoted: false, nextStd: '10', nextClass: 'A' },
-    { id: 3, name: 'Rohan Verma', currentStd: '9', currentClass: 'B', promoted: false, nextStd: '10', nextClass: 'A' },
-    { id: 4, name: 'Ananya Singh', currentStd: '8', currentClass: 'A', promoted: false, nextStd: '9', nextClass: 'A' },
-    { id: 5, name: 'Arjun Gupta', currentStd: '8', currentClass: 'B', promoted: false, nextStd: '9', nextClass: 'B' },
-    { id: 6, name: 'Sneha Reddy', currentStd: '7', currentClass: 'A', promoted: false, nextStd: '8', nextClass: 'A' },
-  ]);
+const PromotionPanelPage = () => {
+    const { toast } = useToast();
+    // Initial student data, now including a unique string ID
+    const [students, setStudents] = useState([
+        { id: '24c511fd', name: 'Nsns', class: 7, section: 'D', promoted: false },
+        { id: '87c68c28', name: 'Meet', class: 4, section: 'B', promoted: false },
+        { id: 'a3d9f0e1', name: 'Priya', class: 9, section: 'A', promoted: false },
+        { id: 'b5e8a1d3', name: 'Rohan', class: 11, section: 'C', promoted: false },
+    ]);
 
-  const classes = ['A', 'B', 'C', 'D', 'E'];
+    const [selectedClass, setSelectedClass] = useState('All Classes');
 
-  const updateNextClass = (id, value) => {
-    setStudents(students.map(student => 
-      student.id === id ? { ...student, nextClass: value } : student
-    ));
-  };
+    const handlePromote = (id) => {
+        const student = students.find(s => s.id === id);
+        if (student) {
+            toast({
+                title: "Student Promoted!",
+                description: `${student.name} has been promoted to Class ${student.class + 1}.`,
+            });
+            // For this example, we'll remove the student from the list upon action.
+            setStudents(students.filter(s => s.id !== id));
+        }
+    };
+    
+    const handleDelete = (id) => {
+        const student = students.find(s => s.id === id);
+        if (student) {
+            toast({
+                title: "Student Deleted",
+                description: `${student.name} has been removed.`,
+                variant: 'destructive',
+            });
+            setStudents(students.filter(s => s.id !== id));
+        }
+    };
+    
+    const handleRepeat = (id) => {
+        const student = students.find(s => s.id === id);
+        if (student) {
+            toast({
+                title: "Student to Repeat",
+                description: `${student.name} will repeat Class ${student.class}.`,
+            });
+             setStudents(students.filter(s => s.id !== id));
+        }
+    };
+    
+    const filteredStudents = selectedClass === 'All Classes' 
+        ? students 
+        : students.filter(s => `Class ${s.class}` === selectedClass);
 
-  const promoteStudent = (id) => {
-    setStudents(students.map(student =>
-      student.id === id ? { ...student, promoted: true } : student
-    ));
-    toast({
-      title: "Student Promoted!",
-      description: "Student has been successfully promoted to next standard.",
-    });
-  };
+    // Get unique classes from students for the dropdown
+    const availableClasses = [...new Set(students.map(s => `Class ${s.class}`))].sort((a, b) => parseInt(a.split(' ')[1]) - parseInt(b.split(' ')[1]));
 
-  const promoteAll = () => {
-    setStudents(students.map(student => ({ ...student, promoted: true })));
-    toast({
-      title: "All Students Promoted!",
-      description: "All students have been successfully promoted.",
-    });
-  };
+    return (
+        <>
+            <Helmet>
+                <title>Promotion Panel - Agentra AI</title>
+                <meta name="description" content="Manage student promotions for the new academic year" />
+            </Helmet>
+            <div className="space-y-4 px-4 pb-10 relative z-10">
+                <div className="text-center pt-4">
+                    <h1 className="text-3xl font-bold text-white">Promotion Panel</h1>
+                    <p className="text-white/70">Manage student promotions for the new academic year</p>
+                </div>
 
-  return (
-    <>
-      <Helmet>
-        <title>Promotion Panel - Patanjali School System</title>
-        <meta name="description" content="Manage student promotions for the next academic year" />
-      </Helmet>
-
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h1 className="text-3xl font-bold text-white">Promotion Panel</h1>
-          <Button
-            onClick={promoteAll}
-            className="bg-[#FFD93D] hover:bg-[#FFD93D]/90 text-[#0F0F0F] font-semibold shadow-[0_0_20px_rgba(255,217,61,0.4)] hover:shadow-[0_0_30px_rgba(255,217,61,0.6)] transition-all duration-300"
-          >
-            <CheckCircle2 size={20} className="mr-2" />
-            Promote All Students
-          </Button>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-[#0F0F0F]/80 backdrop-blur-md border border-white/10 rounded-xl p-6 overflow-x-auto"
-        >
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-white/10">
-                <th className="text-left py-3 px-4 text-white/80 font-medium">Student Name</th>
-                <th className="text-left py-3 px-4 text-white/80 font-medium">Current</th>
-                <th className="text-left py-3 px-4 text-white/80 font-medium">Promote To</th>
-                <th className="text-left py-3 px-4 text-white/80 font-medium">Next Class</th>
-                <th className="text-left py-3 px-4 text-white/80 font-medium">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((student) => (
-                <tr
-                  key={student.id}
-                  className="border-b border-white/5 hover:bg-white/5 transition-colors duration-200"
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 max-w-md mx-auto space-y-6"
                 >
-                  <td className="py-4 px-4 text-white">{student.name}</td>
-                  <td className="py-4 px-4 text-white/70">
-                    Std {student.currentStd}-{student.currentClass}
-                  </td>
-                  <td className="py-4 px-4 text-[#FFD93D] font-semibold">
-                    Std {student.nextStd}
-                  </td>
-                  <td className="py-4 px-4">
-                    <select
-                      value={student.nextClass}
-                      onChange={(e) => updateNextClass(student.id, e.target.value)}
-                      disabled={student.promoted}
-                      className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {classes.map((cls) => (
-                        <option key={cls} value={cls}>{cls}</option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="py-4 px-4">
-                    {student.promoted ? (
-                      <span className="text-green-400 font-medium flex items-center gap-2">
-                        <CheckCircle2 size={18} />
-                        Promoted
-                      </span>
-                    ) : (
-                      <Button
-                        onClick={() => promoteStudent(student.id)}
-                        size="sm"
-                        variant="outline"
-                        className="bg-white/5 border-white/10 text-white hover:bg-[#FFD93D]/20 hover:border-[#FFD93D]/50 hover:text-[#FFD93D] transition-all duration-300"
-                      >
-                        Promote
-                      </Button>
+                    <div>
+                        <label className="block text-xs font-bold tracking-wider text-white/60 mb-2">SELECT CLASS:</label>
+                        <div className="relative">
+                            <select
+                                value={selectedClass}
+                                onChange={(e) => setSelectedClass(e.target.value)}
+                                className="w-full appearance-none px-4 py-3 bg-white/10 border-white/20 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50"
+                            >
+                                <option>All Classes</option>
+                                {availableClasses.map(c => <option key={c}>{c}</option>)}
+                            </select>
+                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50 pointer-events-none" />
+                        </div>
+                    </div>
+                    
+                    <Button className="w-full bg-white/20 hover:bg-white/30 text-white font-bold py-3 rounded-lg transition-all duration-300 text-base">
+                        <TrendingUp size={20} className="mr-2" />
+                        Bulk Promote Class
+                    </Button>
+                </motion.div>
+
+                <div className="space-y-4 max-w-md mx-auto">
+                    {filteredStudents.map((student, index) => (
+                        <motion.div
+                            key={student.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 space-y-4"
+                        >
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h3 className="font-bold text-xl text-white">{student.name}</h3>
+                                    <p className="text-xs text-white/50">ID: {student.id}...</p>
+                                </div>
+                                <div className="text-right flex-shrink-0 pl-4">
+                                    <p className="font-bold text-white">Class {student.class}</p>
+                                    <p className="text-sm text-white/60">Sec {student.section}</p>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Button onClick={() => handlePromote(student.id)} className="w-full bg-green-400/20 hover:bg-green-400/30 text-green-300 font-bold py-2 rounded-lg border border-green-400/30 text-sm">
+                                    <CheckCircle size={16} className="mr-2" />
+                                    Promote to Class {student.class + 1}
+                                 </Button>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <Button onClick={() => handleRepeat(student.id)} className="w-full bg-yellow-400/20 hover:bg-yellow-400/30 text-yellow-300 font-bold py-2 rounded-lg border border-yellow-400/30 text-sm">
+                                        <Repeat size={16} className="mr-2" />
+                                        Repeat
+                                    </Button>
+                                    <Button onClick={() => handleDelete(student.id)} className="w-full bg-red-400/20 hover:bg-red-400/30 text-red-300 font-bold py-2 rounded-lg border border-red-400/30 text-sm">
+                                        <Trash2 size={16} className="mr-2" />
+                                        Delete
+                                    </Button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
+                     {filteredStudents.length === 0 && (
+                        <div className="text-center py-10">
+                            <p className="text-white/50">No students to display for this class.</p>
+                        </div>
                     )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </motion.div>
-      </div>
-    </>
-  );
-}
+                </div>
+            </div>
+        </>
+    );
+};
 
 export default PromotionPanelPage;

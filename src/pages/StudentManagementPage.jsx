@@ -1,216 +1,245 @@
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { Upload, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Upload, User, Phone } from 'lucide-react';
+
+// Dummy initial data
+const initialStudents = [
+  {
+    id: 1,
+    name: 'Meet',
+    standard: '4',
+    section: 'B',
+    parentName: 'Jekkeke',
+    parentContact: 'Jsmwkskek',
+    avatar: 'https://github.com/shadcn.png', // using a placeholder image
+  },
+  {
+    id: 2,
+    name: 'Nsns',
+    standard: '7',
+    section: 'D',
+    parentName: 'Nsns',
+    parentContact: 'Nsnsnsnsje',
+    avatar: null,
+  },
+];
+
+const StudentModal = ({ isOpen, onClose, onSave, student }) => {
+    const [formData, setFormData] = useState(
+        student || {
+            name: '',
+            standard: '',
+            section: '',
+            parentName: '',
+            parentContact: '',
+            avatar: null,
+        }
+    );
+    const [fileName, setFileName] = useState('');
+
+    React.useEffect(() => {
+        if (student) {
+            setFormData(student);
+        } else {
+            setFormData({ name: '', standard: '', section: '', parentName: '', parentContact: '', avatar: null });
+        }
+        setFileName('');
+    }, [student, isOpen]);
+
+    const handleFileChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setFileName(file.name);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFormData(prev => ({ ...prev, avatar: reader.result }));
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    const handleSave = () => {
+        onSave(formData);
+    };
+
+  if (!isOpen) return null;
+
+  return (
+    <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/70 z-50 flex justify-center items-center p-4"
+        onClick={onClose}
+    >
+        <motion.div
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 50, opacity: 0 }}
+            className="bg-[#1C1C1C] rounded-2xl p-6 sm:p-8 w-full max-w-md border border-yellow-400/20 relative"
+            onClick={(e) => e.stopPropagation()}
+        >
+            <h2 className="text-2xl font-bold text-yellow-400 mb-6">{student ? 'Edit Student' : 'Add Student'}</h2>
+            <Button onClick={onClose} className="absolute top-4 right-4 bg-transparent hover:bg-white/10 p-2 h-auto rounded-full">
+                <X className="text-white/70" size={20}/>
+            </Button>
+
+            <div className="space-y-5">
+                <div className="flex flex-col items-center space-y-3">
+                    <div className="w-28 h-28 rounded-full bg-gray-700 border-2 border-dashed border-gray-500 flex items-center justify-center overflow-hidden">
+                        {formData.avatar ? (
+                            <img src={formData.avatar} alt="avatar" className="w-full h-full object-cover" />
+                        ) : (
+                            <User size={48} className="text-gray-400" />
+                        )}
+                    </div>
+                    <div className="relative">
+                         <Button asChild variant="outline" className="bg-gray-800 border-gray-700 hover:bg-gray-700 text-white/80">
+                            <div>
+                                <Upload size={16} className="mr-2"/> Upload Photo
+                            </div>
+                        </Button>
+                        <input type="file" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"/>
+                    </div>
+                    {fileName && <p className="text-xs text-white/50">{fileName}</p>}
+                </div>
+
+                <input type="text" placeholder="Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-3 bg-white/5 rounded-lg text-white placeholder:text-white/40 border border-white/10 focus:ring-yellow-400 focus:border-yellow-400" />
+                <div className="grid grid-cols-2 gap-4">
+                    <select value={formData.standard} onChange={e => setFormData({...formData, standard: e.target.value})} className="w-full p-3 bg-white/5 rounded-lg text-white border border-white/10 focus:ring-yellow-400 focus:border-yellow-400">
+                        <option value="" disabled>Standard</option>
+                        {[...Array(12)].map((_, i) => <option key={i+1} value={i+1}>{i+1}</option>)}
+                    </select>
+                     <select value={formData.section} onChange={e => setFormData({...formData, section: e.target.value})} className="w-full p-3 bg-white/5 rounded-lg text-white border border-white/10 focus:ring-yellow-400 focus:border-yellow-400">
+                        <option value="" disabled>Section</option>
+                        {['A', 'B', 'C', 'D'].map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                </div>
+                <input type="text" placeholder="Parent's Name" value={formData.parentName} onChange={e => setFormData({...formData, parentName: e.target.value})} className="w-full p-3 bg-white/5 rounded-lg text-white placeholder:text-white/40 border border-white/10 focus:ring-yellow-400 focus:border-yellow-400" />
+                <input type="text" placeholder="Parent's Contact" value={formData.parentContact} onChange={e => setFormData({...formData, parentContact: e.target.value})} className="w-full p-3 bg-white/5 rounded-lg text-white placeholder:text-white/40 border border-white/10 focus:ring-yellow-400 focus:border-yellow-400" />
+                
+                <Button onClick={handleSave} className="w-full bg-white text-black font-bold hover:bg-gray-200 py-3">Save Changes</Button>
+            </div>
+        </motion.div>
+    </motion.div>
+  );
+}
 
 function StudentManagementPage() {
+  const [students, setStudents] = useState(initialStudents);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingStudent, setEditingStudent] = useState(null);
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    name: '',
-    standard: '',
-    class: '',
-    parentNumber: '',
-  });
 
-  const standards = ['LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
-  const classes = ['A', 'B', 'C', 'D', 'E'];
-
-  const students = [
-    { id: 1, name: 'Aarav Sharma', standard: '10', class: 'A', parent: '+91 98765 43210', photo: 'https://ui-avatars.com/api/?name=Aarav+Sharma&background=FFD93D&color=0F0F0F' },
-    { id: 2, name: 'Priya Patel', standard: '9', class: 'B', parent: '+91 98765 43211', photo: 'https://ui-avatars.com/api/?name=Priya+Patel&background=4F46E5&color=fff' },
-    { id: 3, name: 'Rohan Verma', standard: '10', class: 'A', parent: '+91 98765 43212', photo: 'https://ui-avatars.com/api/?name=Rohan+Verma&background=8B5CF6&color=fff' },
-    { id: 4, name: 'Ananya Singh', standard: '8', class: 'C', parent: '+91 98765 43213', photo: 'https://ui-avatars.com/api/?name=Ananya+Singh&background=EC4899&color=fff' },
-    { id: 5, name: 'Arjun Gupta', standard: '11', class: 'B', parent: '+91 98765 43214', photo: 'https://ui-avatars.com/api/?name=Arjun+Gupta&background=10B981&color=fff' },
-    { id: 6, name: 'Sneha Reddy', standard: '9', class: 'A', parent: '+91 98765 43215', photo: 'https://ui-avatars.com/api/?name=Sneha+Reddy&background=F59E0B&color=fff' },
-    { id: 7, name: 'Kabir Khan', standard: '7', class: 'D', parent: '+91 98765 43216', photo: 'https://ui-avatars.com/api/?name=Kabir+Khan&background=EF4444&color=fff' },
-    { id: 8, name: 'Diya Joshi', standard: '10', class: 'B', parent: '+91 98765 43217', photo: 'https://ui-avatars.com/api/?name=Diya+Joshi&background=06B6D4&color=fff' },
-  ];
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    toast({
-      title: "Student Added Successfully!",
-      description: `${formData.name} has been added to the system.`,
-    });
-    setFormData({ name: '', standard: '', class: '', parentNumber: '' });
+  const handleAddStudent = () => {
+    setEditingStudent(null);
+    setIsModalOpen(true);
   };
 
-  const handleEdit = (student) => {
-    toast({
-      title: "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀",
-    });
+  const handleEditStudent = (student) => {
+    setEditingStudent(student);
+    setIsModalOpen(true);
   };
 
-  const handleDelete = (student) => {
-    toast({
-      title: "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀",
-    });
+  const handleDeleteStudent = (id) => {
+    setStudents(students.filter(s => s.id !== id));
+    toast({ title: "Success", description: "Student record deleted." });
+  };
+
+  const handleSaveStudent = (studentData) => {
+    if (studentData.id) { // Editing existing student
+      setStudents(students.map(s => s.id === studentData.id ? studentData : s));
+      toast({ title: "Success", description: "Student details updated." });
+    } else { // Adding new student
+      const newStudent = { ...studentData, id: Date.now() };
+      setStudents([newStudent, ...students]);
+      toast({ title: "Success", description: "New student added." });
+    }
+    setIsModalOpen(false);
   };
 
   return (
     <>
       <Helmet>
         <title>Student Management - Patanjali School System</title>
-        <meta name="description" content="Manage students, add new students, and view student information" />
       </Helmet>
-
-      <div className="space-y-8">
-        <h1 className="text-3xl font-bold text-white">Student Management</h1>
-
-        {/* Add Student Form */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-[#0F0F0F]/80 backdrop-blur-md border border-white/10 rounded-xl p-6"
-        >
-          <h2 className="text-xl font-semibold text-[#FFD93D] mb-6">Add New Student</h2>
-          
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">
-                Student Name
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-                placeholder="Enter student name"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">
-                Standard
-              </label>
-              <select
-                value={formData.standard}
-                onChange={(e) => setFormData({ ...formData, standard: e.target.value })}
-                required
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-              >
-                <option value="">Select Standard</option>
-                {standards.map((std) => (
-                  <option key={std} value={std}>{std}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">
-                Class
-              </label>
-              <select
-                value={formData.class}
-                onChange={(e) => setFormData({ ...formData, class: e.target.value })}
-                required
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-              >
-                <option value="">Select Class</option>
-                {classes.map((cls) => (
-                  <option key={cls} value={cls}>{cls}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">
-                Parent Number
-              </label>
-              <input
-                type="tel"
-                value={formData.parentNumber}
-                onChange={(e) => setFormData({ ...formData, parentNumber: e.target.value })}
-                required
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-                placeholder="+91 XXXXX XXXXX"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-white/80 mb-2">
-                Photo Upload
-              </label>
-              <Button
-                type="button"
-                variant="outline"
-                className="bg-white/5 border-white/10 text-white hover:bg-white/10 transition-all duration-300"
-              >
-                <Upload size={18} className="mr-2" />
-                Upload Photo
-              </Button>
-            </div>
-
-            <div className="md:col-span-2">
-              <Button
-                type="submit"
-                className="w-full bg-[#FFD93D] hover:bg-[#FFD93D]/90 text-[#0F0F0F] font-semibold py-3 rounded-lg shadow-[0_0_20px_rgba(255,217,61,0.4)] hover:shadow-[0_0_30px_rgba(255,217,61,0.6)] transition-all duration-300"
-              >
+      
+      <div className="space-y-6 relative z-10">
+        <div className="relative flex justify-center items-center">
+            <h1 className="text-3xl font-bold text-white">Manage Student Records</h1>
+            <Button onClick={handleAddStudent} className="absolute right-0 bg-black text-white hover:bg-gray-800 border border-white/20">
+                <Plus size={20} className="mr-2" />
                 Add Student
-              </Button>
-            </div>
-          </form>
-        </motion.div>
+            </Button>
+        </div>
 
-        {/* Student List */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-[#0F0F0F]/80 backdrop-blur-md border border-white/10 rounded-xl p-6"
+        <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } }}
+            initial="hidden"
+            animate="show"
         >
-          <h2 className="text-xl font-semibold text-[#FFD93D] mb-6">Student List</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {students.map((student) => (
-              <motion.div
-                key={student.id}
-                whileHover={{ scale: 1.02 }}
-                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 hover:shadow-[0_0_20px_rgba(255,217,61,0.2)] transition-all duration-300"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <img
-                    src={student.photo}
-                    alt={student.name}
-                    className="w-12 h-12 rounded-full border-2 border-[#FFD93D]/30"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-white font-semibold truncate">{student.name}</h3>
-                    <p className="text-white/60 text-sm">Std {student.standard} - {student.class}</p>
+          {students.map(student => (
+            <motion.div 
+                key={student.id} 
+                className="bg-transparent backdrop-blur-md border border-white/10 rounded-2xl p-5 space-y-4"
+                variants={{ hidden: { y: 20, opacity: 0 }, show: { y: 0, opacity: 1 } }}
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
+                  {student.avatar ? (
+                     <img src={student.avatar} alt={student.name} className="w-full h-full object-cover" />
+                  ) : (
+                     student.name.charAt(0).toUpperCase()
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">{student.name}</h3>
+                  <div className="flex gap-2 text-xs mt-1">
+                    <span className="bg-white/10 text-white/80 px-2 py-0.5 rounded">Class {student.standard}</span>
+                    <span className="bg-white/10 text-white/80 px-2 py-0.5 rounded">Sec {student.section}</span>
                   </div>
                 </div>
-                
-                <p className="text-white/70 text-sm mb-3">{student.parent}</p>
-                
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => handleEdit(student)}
-                    size="sm"
-                    variant="outline"
-                    className="flex-1 bg-white/5 border-white/10 text-white hover:bg-blue-500/20 hover:border-blue-500/50 transition-all duration-300"
-                  >
-                    <Edit size={14} className="mr-1" />
-                    Edit
-                  </Button>
-                  <Button
-                    onClick={() => handleDelete(student)}
-                    size="sm"
-                    variant="outline"
-                    className="flex-1 bg-white/5 border-white/10 text-white hover:bg-red-500/20 hover:border-red-500/50 transition-all duration-300"
-                  >
-                    <Trash2 size={14} className="mr-1" />
-                    Delete
-                  </Button>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+              </div>
+              
+              <div className="bg-white/5 p-4 rounded-lg space-y-2 text-white/80 text-sm">
+                  <div className="flex items-center gap-3">
+                      <User size={16} className="text-white/50" />
+                      <span>Parent: {student.parentName}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                      <Phone size={16} className="text-white/50" />
+                      <span>{student.parentContact}</span>
+                  </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Button onClick={() => handleEditStudent(student)} variant="outline" className="w-full bg-white/10 hover:bg-white/20 border-white/20 text-white">
+                  <Edit size={16} className="mr-2"/>
+                  Edit Details
+                </Button>
+                <Button onClick={() => handleDeleteStudent(student.id)} variant="destructive" className="w-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400">
+                  <Trash2 size={16} className="mr-2"/>
+                  Delete Record
+                </Button>
+              </div>
+            </motion.div>
+          ))}
         </motion.div>
       </div>
+
+      <AnimatePresence>
+        <StudentModal 
+            isOpen={isModalOpen} 
+            onClose={() => setIsModalOpen(false)} 
+            onSave={handleSaveStudent} 
+            student={editingStudent} 
+        />
+      </AnimatePresence>
     </>
   );
 }

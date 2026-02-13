@@ -29,8 +29,8 @@ function AnalyticsPage() {
         <meta name="description" content="View school performance analytics and statistics" />
       </Helmet>
 
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-white">Analytics Dashboard</h1>
+      <div className="space-y-6 relative z-10">
+        <h1 className="text-3xl font-bold text-white text-center">Analytics Dashboard</h1>
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">

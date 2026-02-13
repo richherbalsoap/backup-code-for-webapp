@@ -1,0 +1,13 @@
+## Pages
+- [AI Insight Chatbot - Patanjali School System](/aichatbot): Get AI-powered insights and recommendations for school management
+- [Analytics - EDULinker](/analytics): View analytics and data visualizations
+- [Announcements - Patanjali School System](/announcements): Send announcements and notifications to students and parents
+- [Complaint Sender - EDULinker](/complaintsender): Send complaints and notifications to parents
+- [Dashboard - EDULinker](/dashboard): View your school dashboard statistics and overview
+- [Fees Reminder - EDULinker](/feesreminder): Send fees reminders to parents
+- [Homework Sender - EDULinker](/homeworksender): Send homework assignments to students and parents
+- [Login - EDULinker](/login): welcome to EDULinker System dashboard
+- [Promotion Panel - Patanjali School System](/promotionpanel): Manage student promotions for the next academic year
+- [Result Sender - EDULinker](/resultsender): Send exam results and report cards to parents
+- [Settings - EDULinker](/settings): Manage your account settings and preferences
+- [Student Management - EDULinker](/studentmanagement): Manage students, add new students, and view student information

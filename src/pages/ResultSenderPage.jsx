@@ -1,228 +1,180 @@
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet';
-import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
-import { Send, Plus, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Upload, Award } from 'lucide-react';
 
 function ResultSenderPage() {
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    studentName: '',
-    standard: '',
-    class: '',
-    examType: '',
-    parentNumber: '',
-  });
-
-  const [marks, setMarks] = useState([
-    { subject: 'Mathematics', obtained: '', total: '100' },
-    { subject: 'Science', obtained: '', total: '100' },
-    { subject: 'English', obtained: '', total: '100' },
-  ]);
+  const [standard, setStandard] = useState('');
+  const [classSection, setClassSection] = useState('');
+  const [student, setStudent] = useState('');
+  const [subject, setSubject] = useState('');
+  const [obtainedMarks, setObtainedMarks] = useState('');
+  const [totalMarks, setTotalMarks] = useState('100');
+  const [resultPhoto, setResultPhoto] = useState(null);
 
   const standards = ['LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
   const classes = ['A', 'B', 'C', 'D', 'E'];
-  const examTypes = ['Unit Test 1', 'Unit Test 2', 'Mid-Term Exam', 'Final Exam', 'Annual Exam'];
+  const students = ['Rohan', 'Priya', 'Amit', 'Sneha', 'Vikas']; // Example data
+  const subjects = ['Mathematics', 'Science', 'English', 'History', 'Geography', 'Hindi']; // Example data
 
-  const addSubject = () => {
-    setMarks([...marks, { subject: '', obtained: '', total: '100' }]);
-  };
 
-  const removeSubject = (index) => {
-    setMarks(marks.filter((_, i) => i !== index));
-  };
-
-  const updateMark = (index, field, value) => {
-    const newMarks = [...marks];
-    newMarks[index][field] = value;
-    setMarks(newMarks);
+  const handleFileChange = (e) => {
+    if (e.target.files.length > 0) {
+      setResultPhoto(e.target.files[0]);
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!standard || !classSection || !student || !subject || !obtainedMarks || !totalMarks) {
+        toast({
+            title: "Incomplete Form",
+            description: "Please fill all the required fields.",
+            variant: "destructive",
+        });
+        return;
+    }
     toast({
-      title: "Result Sent Successfully!",
-      description: `Result for ${formData.studentName} has been sent to parent.`,
+      title: "Result Published!",
+      description: `Result for ${student} in ${subject} has been published.`,
     });
-    setFormData({ studentName: '', standard: '', class: '', examType: '', parentNumber: '' });
-    setMarks([
-      { subject: 'Mathematics', obtained: '', total: '100' },
-      { subject: 'Science', obtained: '', total: '100' },
-      { subject: 'English', obtained: '', total: '100' },
-    ]);
+    // Reset form
+    setStandard('');
+    setClassSection('');
+    setStudent('');
+    setSubject('');
+    setObtainedMarks('');
+    setTotalMarks('100');
+    setResultPhoto(null);
   };
 
   return (
     <>
       <Helmet>
-        <title>Result Sender - Patanjali School System</title>
-        <meta name="description" content="Send exam results and report cards to parents" />
+        <title>Publish Exam Results - Patanjali School System</title>
       </Helmet>
 
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-white">Result Sender</h1>
+      <div className="space-y-6 relative z-10">
+        <h1 className="text-3xl font-bold text-white text-center">Publish Exam Results</h1>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#0F0F0F]/80 backdrop-blur-md border border-white/10 rounded-xl p-6"
+          className="bg-transparent backdrop-blur-md border border-white/10 rounded-xl p-6 max-w-2xl mx-auto"
         >
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-white/80 mb-2">
-                  Student Name
-                </label>
-                <input
-                  type="text"
-                  value={formData.studentName}
-                  onChange={(e) => setFormData({ ...formData, studentName: e.target.value })}
-                  required
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-                  placeholder="Enter student name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/80 mb-2">
-                  Parent Contact Number
-                </label>
-                <input
-                  type="tel"
-                  value={formData.parentNumber}
-                  onChange={(e) => setFormData({ ...formData, parentNumber: e.target.value })}
-                  required
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-                  placeholder="+91 XXXXX XXXXX"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/80 mb-2">
-                  Standard
-                </label>
+                <label className="block text-sm font-medium text-white/80 mb-2">STANDARD</label>
                 <select
-                  value={formData.standard}
-                  onChange={(e) => setFormData({ ...formData, standard: e.target.value })}
+                  value={standard}
+                  onChange={(e) => setStandard(e.target.value)}
                   required
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
                 >
                   <option value="">Select Standard</option>
-                  {standards.map((std) => (
-                    <option key={std} value={std}>{std}</option>
-                  ))}
+                  {standards.map((std) => <option key={std} value={std}>{std}</option>)}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-white/80 mb-2">
-                  Class
-                </label>
+                <label className="block text-sm font-medium text-white/80 mb-2">CLASS SECTION</label>
                 <select
-                  value={formData.class}
-                  onChange={(e) => setFormData({ ...formData, class: e.target.value })}
+                  value={classSection}
+                  onChange={(e) => setClassSection(e.target.value)}
                   required
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
                 >
-                  <option value="">Select Class</option>
-                  {classes.map((cls) => (
-                    <option key={cls} value={cls}>{cls}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-white/80 mb-2">
-                  Exam Type
-                </label>
-                <select
-                  value={formData.examType}
-                  onChange={(e) => setFormData({ ...formData, examType: e.target.value })}
-                  required
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-                >
-                  <option value="">Select Exam Type</option>
-                  {examTypes.map((type) => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
+                  <option value="">Select Section</option>
+                  {classes.map((cls) => <option key={cls} value={cls}>{cls}</option>)}
                 </select>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-white/80">
-                  Subject-wise Marks
-                </label>
-                <Button
-                  type="button"
-                  onClick={addSubject}
-                  size="sm"
-                  variant="outline"
-                  className="bg-white/5 border-white/10 text-white hover:bg-white/10 transition-all duration-300"
-                >
-                  <Plus size={16} className="mr-1" />
-                  Add Subject
-                </Button>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-white/80 mb-2">STUDENT</label>
+              <select
+                value={student}
+                onChange={(e) => setStudent(e.target.value)}
+                required
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
+              >
+                <option value="">Select Student</option>
+                {students.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
 
-              {marks.map((mark, index) => (
-                <div key={index} className="grid grid-cols-12 gap-3">
-                  <div className="col-span-12 sm:col-span-5">
+            <div>
+              <label className="block text-sm font-medium text-white/80 mb-2">SUBJECT</label>
+              <select
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                required
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
+              >
+                <option value="">Select Subject</option>
+                {subjects.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-medium text-white/80 mb-2">OBTAINED MARKS</label>
                     <input
-                      type="text"
-                      value={mark.subject}
-                      onChange={(e) => updateMark(index, 'subject', e.target.value)}
-                      required
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-                      placeholder="Subject name"
+                        type="number"
+                        value={obtainedMarks}
+                        onChange={(e) => setObtainedMarks(e.target.value)}
+                        required
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
+                        placeholder="0"
                     />
-                  </div>
-                  <div className="col-span-5 sm:col-span-3">
-                    <input
-                      type="number"
-                      value={mark.obtained}
-                      onChange={(e) => updateMark(index, 'obtained', e.target.value)}
-                      required
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-                      placeholder="Obtained"
-                    />
-                  </div>
-                  <div className="col-span-5 sm:col-span-3">
-                    <input
-                      type="number"
-                      value={mark.total}
-                      onChange={(e) => updateMark(index, 'total', e.target.value)}
-                      required
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-                      placeholder="Total"
-                    />
-                  </div>
-                  <div className="col-span-2 sm:col-span-1 flex items-center justify-center">
-                    {marks.length > 1 && (
-                      <Button
-                        type="button"
-                        onClick={() => removeSubject(index)}
-                        size="sm"
-                        variant="ghost"
-                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                      >
-                        <Trash2 size={18} />
-                      </Button>
-                    )}
-                  </div>
                 </div>
-              ))}
+                <div>
+                    <label className="block text-sm font-medium text-white/80 mb-2">TOTAL MARKS</label>
+                    <input
+                        type="number"
+                        value={totalMarks}
+                        onChange={(e) => setTotalMarks(e.target.value)}
+                        required
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
+                        placeholder="100"
+                    />
+                </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-white/70 mb-2">RESULT PHOTO (OPTIONAL)</label>
+              <div className="relative w-full h-32 border-2 border-dashed border-white/20 rounded-lg flex flex-col justify-center items-center text-white/50 hover:border-white/40 transition-colors duration-300">
+                <input
+                  type="file"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  onChange={handleFileChange}
+                  accept="image/*"
+                />
+                {resultPhoto ? (
+                  <div className="text-center text-white">
+                      <p className="font-semibold">{resultPhoto.name}</p>
+                      <p className="text-xs text-white/60">Click again or drop to replace</p>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                      <Upload size={32} className="mx-auto mb-2" />
+                      <p>Click to upload result Image</p>
+                  </div>
+                )}
+              </div>
             </div>
 
             <Button
               type="submit"
-              className="w-full bg-[#FFD93D] hover:bg-[#FFD93D]/90 text-[#0F0F0F] font-semibold py-3 rounded-lg shadow-[0_0_20px_rgba(255,217,61,0.4)] hover:shadow-[0_0_30px_rgba(255,217,61,0.6)] transition-all duration-300"
+              className="w-full bg-[#FFD93D] hover:bg-[#FFD93D]/90 text-black font-bold py-3 rounded-lg shadow-[0_0_20px_rgba(255,217,61,0.4)] hover:shadow-[0_0_30px_rgba(255,217,61,0.6)] transition-all duration-300 flex items-center justify-center gap-2"
             >
-              <Send size={20} className="mr-2" />
-              Send Result to Parent
+              <Award size={20} />
+              Publish Result
             </Button>
           </form>
         </motion.div>

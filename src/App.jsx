@@ -1,10 +1,9 @@
 
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from '@/context/AuthContext';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import ScrollToTop from '@/components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import MainLayout from '@/layouts/MainLayout';
+import Layout from '@/components/Layout';
 import LoginPage from '@/pages/LoginPage';
 import DashboardPage from '@/pages/DashboardPage';
 import StudentManagementPage from '@/pages/StudentManagementPage';
@@ -17,38 +16,33 @@ import AnalyticsPage from '@/pages/AnalyticsPage';
 import AIChatbotPage from '@/pages/AIChatbotPage';
 import PromotionPanelPage from '@/pages/PromotionPanelPage';
 import SettingsPage from '@/pages/SettingsPage';
-import { Toaster } from '@/components/ui/toaster';
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <ScrollToTop />
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          
-          <Route path="/" element={
-            <ProtectedRoute>
-              <MainLayout />
-            </ProtectedRoute>
-          }>
-            <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="students" element={<StudentManagementPage />} />
-            <Route path="homework" element={<HomeworkSenderPage />} />
-            <Route path="complaints" element={<ComplaintSenderPage />} />
-            <Route path="results" element={<ResultSenderPage />} />
-            <Route path="fees" element={<FeesReminderPage />} />
-            <Route path="announcements" element={<AnnouncementsPage />} />
-            <Route path="analytics" element={<AnalyticsPage />} />
-            <Route path="ai-chatbot" element={<AIChatbotPage />} />
-            <Route path="promotion" element={<PromotionPanelPage />} />
-            <Route path="settings" element={<SettingsPage />} />
-          </Route>
-        </Routes>
-        <Toaster />
-      </BrowserRouter>
-    </AuthProvider>
+    <>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }>
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="students" element={<StudentManagementPage />} />
+          <Route path="homework" element={<HomeworkSenderPage />} />
+          <Route path="complaints" element={<ComplaintSenderPage />} />
+          <Route path="results" element={<ResultSenderPage />} />
+          <Route path="fees" element={<FeesReminderPage />} />
+          <Route path="announcements" element={<AnnouncementsPage />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="ai-chatbot" element={<AIChatbotPage />} />
+          <Route path="promotion" element={<PromotionPanelPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+        </Route>
+      </Routes>
+    </>
   );
 }
 

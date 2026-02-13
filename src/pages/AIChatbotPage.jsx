@@ -1,11 +1,11 @@
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Helmet } from 'react-helmet';
+import React, { useState, useRef, useEffect } from 'react';
+import { Bot, Send, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Send, Bot } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 
-function AIChatbotPage() {
+const AIChatbotPage = () => {
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -14,9 +14,10 @@ function AIChatbotPage() {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
-  const [inputMessage, setInputMessage] = useState('');
+  const [inputValue, setInputValue] = useState('');
+  const chatContainerRef = useRef(null);
 
-  const botResponses = [
+  const sampleBotResponses = [
     "Based on the data, I recommend focusing on improving Science scores for Class 9-B.",
     "The attendance rate has improved by 12% this month. Great progress!",
     "I can help you analyze student performance trends. What specific class would you like to review?",
@@ -25,28 +26,34 @@ function AIChatbotPage() {
     "Parent engagement has increased by 25% since implementing the SMS reminder system.",
   ];
 
-  const handleSend = (e) => {
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSendMessage = (e) => {
     e.preventDefault();
-    if (!inputMessage.trim()) return;
+    if (!inputValue.trim()) return;
 
     const userMessage = {
       id: messages.length + 1,
-      text: inputMessage,
+      text: inputValue,
       sender: 'user',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
     setMessages([...messages, userMessage]);
-    setInputMessage('');
+    setInputValue('');
 
     setTimeout(() => {
       const botMessage = {
         id: messages.length + 2,
-        text: botResponses[Math.floor(Math.random() * botResponses.length)],
+        text: sampleBotResponses[Math.floor(Math.random() * sampleBotResponses.length)],
         sender: 'bot',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
-      setMessages((prev) => [...prev, botMessage]);
+      setMessages(prevMessages => [...prevMessages, botMessage]);
     }, 1000);
   };
 
@@ -56,18 +63,16 @@ function AIChatbotPage() {
         <title>AI Insight Chatbot - Patanjali School System</title>
         <meta name="description" content="Get AI-powered insights and recommendations for school management" />
       </Helmet>
-
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-white">AI Insight Chatbot</h1>
+      <div className="space-y-6 relative z-10">
+        <h1 className="text-3xl font-bold text-white text-center">AI Insight Chatbot</h1>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#0F0F0F]/80 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden flex flex-col"
+          className="bg-[#0F0F0F]/80 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden flex flex-col max-w-4xl mx-auto"
           style={{ height: 'calc(100vh - 250px)', minHeight: '500px' }}
         >
-          {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+          <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
             {messages.map((message) => (
               <motion.div
                 key={message.id}
@@ -77,8 +82,8 @@ function AIChatbotPage() {
               >
                 <div className={`flex gap-3 max-w-[80%] ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                   <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                    message.sender === 'bot' 
-                      ? 'bg-[#FFD93D]/20 border border-[#FFD93D]/30' 
+                    message.sender === 'bot'
+                      ? 'bg-[#FFD93D]/20 border border-[#FFD93D]/30'
                       : 'bg-white/10 border border-white/20'
                   }`}>
                     {message.sender === 'bot' ? (
@@ -102,13 +107,12 @@ function AIChatbotPage() {
             ))}
           </div>
 
-          {/* Input Area */}
           <div className="border-t border-white/10 p-4">
-            <form onSubmit={handleSend} className="flex gap-3">
+            <form onSubmit={handleSendMessage} className="flex gap-3">
               <input
                 type="text"
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Ask me anything about school analytics..."
                 className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
               />
@@ -124,6 +128,6 @@ function AIChatbotPage() {
       </div>
     </>
   );
-}
+};
 
 export default AIChatbotPage;
