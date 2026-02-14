@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { useToast } from '@/components/ui/use-toast';
 
+const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+
 const FeesReminderPage = () => {
   const { toast } = useToast();
   const [standard, setStandard] = useState('');
@@ -13,7 +15,6 @@ const FeesReminderPage = () => {
   const [student, setStudent] = useState('');
   const [message, setMessage] = useState('');
 
-  const standards = ['LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
   const classes = ['A', 'B', 'C', 'D', 'E'];
   const students = ['Rohan Gupta', 'Priya Sharma', 'Amit Singh', 'Sneha Patel', 'Vikas Verma']; // Example student data
 

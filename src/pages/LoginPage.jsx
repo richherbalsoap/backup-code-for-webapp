@@ -167,10 +167,15 @@ const LoginPage = () => {
     };
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    login();
-    navigate('/dashboard');
+    try {
+      await login();
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Login failed:', error);
+      // You might want to show an error message to the user here
+    }
   };
 
   return (
@@ -219,7 +224,7 @@ const LoginPage = () => {
                     id="password"
                     type="password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => setPassword(e.targe.value)}
                     required
                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 focus:border-[#FFD93D]/50 transition-all duration-300"
                     placeholder="Enter your password"

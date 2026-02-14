@@ -25,7 +25,6 @@ function HomePage() {
 
   const FeatureCard = ({ feature, index }) => (
     <motion.div
-      key={feature.name}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
@@ -55,7 +54,7 @@ function HomePage() {
           transition={{ duration: 0.5 }}
         >
           {mainFeatures.map((feature, index) => (
-            <FeatureCard feature={feature} index={index} />
+            <FeatureCard key={feature.name} feature={feature} index={index} />
           ))}
         </motion.div>
 
@@ -78,7 +77,7 @@ function HomePage() {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             {secondaryFeatures.map((feature, index) => (
-              <FeatureCard feature={feature} index={index + mainFeatures.length} />
+              <FeatureCard key={feature.name} feature={feature} index={index + mainFeatures.length} />
             ))}
           </motion.div>
         </div>

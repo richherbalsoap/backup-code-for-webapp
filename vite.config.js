@@ -1,12 +1,38 @@
+
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { createLogger, defineConfig } from 'vite';
+import bodyParser from 'body-parser';
+import fs from 'fs/promises';
 import inlineEditPlugin from './plugins/visual-editor/vite-plugin-react-inline-editor.js';
 import editModeDevPlugin from './plugins/visual-editor/vite-plugin-edit-mode.js';
 import iframeRouteRestorationPlugin from './plugins/vite-plugin-iframe-route-restoration.js';
 import selectionModePlugin from './plugins/selection-mode/vite-plugin-selection-mode.js';
 
 const isDev = process.env.NODE_ENV !== 'production';
+
+// Helper function to find student marks
+async function findStudentMarks(studentName) {
+  try {
+    const marksData = await fs.readFile('data/marks.json', 'utf-8');
+    const data = JSON.parse(marksData);
+    const student = data.students.find(s => s.name.toLowerCase() === studentName.toLowerCase());
+
+    if (student) {
+      let response = `Here are the marks for ${student.name} (Class ${student.class}${student.section}):\n`;
+      for (const [subject, mark] of Object.entries(student.marks)) {
+        response += `- ${subject}: ${mark}\n`;
+      }
+      return response;
+    } else {
+      return `Sorry, I couldn't find any marks for a student named '${studentName}'. Please make sure the name is correct.`;
+    }
+  } catch (error) {
+    console.error('Error reading or parsing marks.json:', error);
+    return "Sorry, I'm having trouble accessing the student records right now. Please try again later.";
+  }
+}
+
 
 const configHorizonsViteErrorHandler = `
 const observer = new MutationObserver((mutations) => {
@@ -234,33 +260,59 @@ logger.error = (msg, options) => {
 }
 
 export default defineConfig({
-	customLogger: logger,
-	plugins: [
-		...(isDev ? [inlineEditPlugin(), editModeDevPlugin(), iframeRouteRestorationPlugin(), selectionModePlugin()] : []),
-		react(),
-		addTransformIndexHtml
-	],
-	server: {
-		cors: true,
-		headers: {
-			'Cross-Origin-Embedder-Policy': 'credentialless',
-		},
-		allowedHosts: true,
-	},
-	resolve: {
-		extensions: ['.jsx', '.js', '.tsx', '.ts', '.json', ],
-		alias: {
-			'@': path.resolve(__dirname, './src'),
-		},
-	},
-	build: {
-		rollupOptions: {
-			external: [
-				'@babel/parser',
-				'@babel/traverse',
-				'@babel/generator',
-				'@babel/types'
-			]
-		}
-	}
+  customLogger: logger,
+  plugins: [
+    ...(isDev ? [inlineEditPlugin(), editModeDevPlugin(), iframeRouteRestorationPlugin(), selectionModePlugin()] : []),
+    react(),
+    addTransformIndexHtml,
+    {
+      name: 'custom-marks-api',
+      configureServer(server) {
+        server.middlewares.use(bodyParser.json());
+        server.middlewares.use(async (req, res, next) => {
+          if (req.url === '/api/chatbot') {
+            const { message } = req.body;
+
+            // Simple logic to extract a name from the message
+            const nameMatch = message.match(/(\w+)/);
+            const studentName = nameMatch ? nameMatch[1] : '';
+
+            if (studentName) {
+              const botResponse = await findStudentMarks(studentName);
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ text: botResponse }));
+            } else {
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ text: "Please tell me the student's name you want to look up." }));
+            }
+          } else {
+            next();
+          }
+        });
+      },
+    },
+  ],
+  server: {
+    cors: true,
+    headers: {
+      'Cross-Origin-Embedder-Policy': 'credentialless',
+    },
+    allowedHosts: true,
+  },
+  resolve: {
+    extensions: ['.jsx', '.js', '.tsx', '.ts', '.json', ],
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  build: {
+    rollupOptions: {
+      external: [
+        '@babel/parser',
+        '@babel/traverse',
+        '@babel/generator',
+        '@babel/types'
+      ]
+    }
+  }
 });

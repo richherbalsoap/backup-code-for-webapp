@@ -17,22 +17,13 @@ const AIChatbotPage = () => {
   const [inputValue, setInputValue] = useState('');
   const chatContainerRef = useRef(null);
 
-  const sampleBotResponses = [
-    "Based on the data, I recommend focusing on improving Science scores for Class 9-B.",
-    "The attendance rate has improved by 12% this month. Great progress!",
-    "I can help you analyze student performance trends. What specific class would you like to review?",
-    "Homework submission rates are highest on Tuesdays and Wednesdays.",
-    "Would you like me to generate a detailed report for the current academic year?",
-    "Parent engagement has increased by 25% since implementing the SMS reminder system.",
-  ];
-
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
@@ -46,15 +37,34 @@ const AIChatbotPage = () => {
     setMessages([...messages, userMessage]);
     setInputValue('');
 
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/chatbot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: inputValue }),
+      });
+
+      const data = await response.json();
+
       const botMessage = {
         id: messages.length + 2,
-        text: sampleBotResponses[Math.floor(Math.random() * sampleBotResponses.length)],
+        text: data.text,
         sender: 'bot',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages(prevMessages => [...prevMessages, botMessage]);
-    }, 1000);
+    } catch (error) {
+      console.error('Error fetching bot response:', error);
+      const botMessage = {
+        id: messages.length + 2,
+        text: "Sorry, I'm having trouble connecting. Please try again later.",
+        sender: 'bot',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages(prevMessages => [...prevMessages, botMessage]);
+    }
   };
 
   return (
@@ -89,7 +99,7 @@ const AIChatbotPage = () => {
                     {message.sender === 'bot' ? (
                       <Bot size={18} className="text-[#FFD93D]" />
                     ) : (
-                      <span className="text-white text-sm">U</span>
+                      <User size={18} className="text-white" />
                     )}
                   </div>
                   <div>
@@ -98,7 +108,7 @@ const AIChatbotPage = () => {
                         ? 'bg-white/5 border border-white/10'
                         : 'bg-[#FFD93D]/20 border border-[#FFD93D]/30'
                     }`}>
-                      <p className="text-white text-sm leading-relaxed">{message.text}</p>
+                      <p className="text-white text-sm leading-relaxed" style={{ whiteSpace: 'pre-wrap' }}>{message.text}</p>
                     </div>
                     <p className="text-white/40 text-xs mt-1 px-2">{message.timestamp}</p>
                   </div>
@@ -113,7 +123,7 @@ const AIChatbotPage = () => {
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Ask me anything about school analytics..."
+                placeholder="Ask for a student's marks (e.g., 'Rohan')"
                 className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
               />
               <Button

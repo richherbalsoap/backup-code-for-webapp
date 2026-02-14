@@ -1,0 +1,31 @@
+
+{
+  "students": [
+    {
+      "name": "Rohan",
+      "class": "10",
+      "section": "A",
+      "marks": {
+        "Mathematics": "85",
+        "Science": "92",
+        "English": "78",
+        "History": "88",
+        "Geography": "95",
+        "Hindi": "80"
+      }
+    },
+    {
+      "name": "Priya",
+      "class": "10",
+      "section": "B",
+      "marks": {
+        "Mathematics": "90",
+        "Science": "88",
+        "English": "91",
+        "History": "82",
+        "Geography": "89",
+        "Hindi": "85"
+      }
+    }
+  ]
+}

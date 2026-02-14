@@ -1,124 +1,132 @@
 
 import React, { useState } from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import useAppStore from '../store/appStore';
-import { BookOpen, Upload, Paperclip } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
+import { Send, Calendar, BookOpen, ChevronDown } from 'lucide-react';
 
-function HomeworkSender() {
-  const { addHomework } = useAppStore();
-  const [standard, setStandard] = useState('');
-  const [section, setSection] = useState('');
-  const [instructions, setInstructions] = useState('');
-  const [file, setFile] = useState(null);
+const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+const sections = ['A', 'B', 'C', 'D', 'E'];
+const subjects = ['Mathematics', 'Science', 'English', 'Hindi', 'Social Studies', 'Computer Science'];
 
-  const handleFileChange = (e) => {
-    if (e.target.files.length > 0) {
-      setFile(e.target.files[0]);
-    }
-  };
+const HomeworkSenderPage = () => {
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    standard: '',
+    section: '',
+    subject: '',
+    homework: '',
+    dueDate: '',
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!standard || !section || !instructions) return;
-
-    const newHomework = {
-      id: Date.now(),
-      standard,
-      section,
-      instructions,
-      fileName: file ? file.name : null,
-    };
-
-    addHomework(newHomework);
-
+    if (!formData.standard || !formData.section || !formData.subject || !formData.homework) {
+        toast({ 
+            title: "Incomplete Information", 
+            description: "Please fill out all the fields before sending.",
+            variant: "destructive"
+        });
+        return;
+    }
+    toast({ 
+      title: "Homework Sent Successfully!", 
+      description: `Homework for ${formData.standard} - ${formData.section} has been sent to all parents.` 
+    });
     // Reset form
-    setStandard('');
-    setSection('');
-    setInstructions('');
-    setFile(null);
+    setFormData({ standard: '', section: '', subject: '', homework: '', dueDate: '' });
   };
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  }
 
   return (
     <>
       <Helmet>
-        <title>Homework Sender - Patanjali School System</title>
+        <title>Homework Sender - EDULinker</title>
+        <meta name="description" content="Send homework assignments to students and parents" />
       </Helmet>
-
-      <div className="space-y-6 relative z-10">
+      
+      <div className="space-y-6 px-4 pb-10 relative z-10">
         <h1 className="text-3xl font-bold text-white text-center">Homework Sender</h1>
-
-        <motion.form
+        
+        <motion.form 
           onSubmit={handleSubmit}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-transparent backdrop-blur-md border border-white/10 rounded-xl p-6 space-y-6 max-w-3xl mx-auto"
+          className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 max-w-2xl mx-auto space-y-6"
         >
-          {/* Standard and Section */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-white/70 mb-2">STANDARD</label>
-              <select value={standard} onChange={(e) => setStandard(e.target.value)} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition">
-                <option value="">Select Standard</option>
-                {[...Array(12).keys()].map(i => <option key={i+1} value={i+1}>{i+1}</option>)}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="relative">
+              <label className="block text-xs font-bold tracking-wider text-white/60 mb-2">STANDARD</label>
+              <select 
+                value={formData.standard} 
+                onChange={e => handleInputChange('standard', e.target.value)}
+                className="w-full appearance-none p-3 bg-white/10 border-white/20 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50"
+              >
+                <option value="" disabled>Select Standard</option>
+                {standards.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
+              <ChevronDown className="absolute right-3 bottom-3 w-5 h-5 text-white/50 pointer-events-none" />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-white/70 mb-2">CLASS SECTION</label>
-              <select value={section} onChange={(e) => setSection(e.target.value)} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition">
-                <option value="">Select Section</option>
-                {['A', 'B', 'C', 'D'].map(s => <option key={s} value={s}>{s}</option>)}
+
+            <div className="relative">
+              <label className="block text-xs font-bold tracking-wider text-white/60 mb-2">CLASS SECTION</label>
+              <select 
+                value={formData.section} 
+                onChange={e => handleInputChange('section', e.target.value)}
+                className="w-full appearance-none p-3 bg-white/10 border-white/20 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50"
+              >
+                <option value="" disabled>Select Section</option>
+                {sections.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
+              <ChevronDown className="absolute right-3 bottom-3 w-5 h-5 text-white/50 pointer-events-none" />
             </div>
           </div>
 
-          {/* Attachment */}
-          <div>
-            <label className="block text-sm font-medium text-white/70 mb-2">ATTACHMENT</label>
-            <div className="relative w-full h-40 border-2 border-dashed border-white/20 rounded-lg flex flex-col justify-center items-center text-white/50 hover:border-white/40 transition-colors duration-300">
-              <input
-                type="file"
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                onChange={handleFileChange}
-                accept=".pdf,.png,.jpg"
-              />
-              {file ? (
-                <div className="text-center text-white">
-                    <Paperclip className="mx-auto mb-2"/>
-                    <p className="font-semibold">{file.name}</p>
-                    <p className="text-xs text-white/60">Click again or drop to replace</p>
-                </div>
-              ) : (
-                <div className="text-center">
-                    <Upload size={32} className="mx-auto mb-2" />
-                    <p>Drop file here or <span className="font-semibold text-[#FFD93D]">click to upload</span></p>
-                    <p className="text-xs mt-1">Supports: PDF, PNG, JPG</p>
-                </div>
-              )}
-            </div>
+          <div className="relative">
+            <label className="block text-xs font-bold tracking-wider text-white/60 mb-2">SUBJECT</label>
+            <select 
+              value={formData.subject} 
+              onChange={e => handleInputChange('subject', e.target.value)}
+              className="w-full appearance-none p-3 bg-white/10 border-white/20 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50"
+            >
+              <option value="" disabled>Select Subject</option>
+              {subjects.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <ChevronDown className="absolute right-3 bottom-3 w-5 h-5 text-white/50 pointer-events-none" />
           </div>
 
-          {/* Instructions */}
           <div>
-            <label htmlFor="instructions" className="block text-sm font-medium text-white/70 mb-2">INSTRUCTIONS</label>
-            <textarea
-              id="instructions"
-              value={instructions}
-              onChange={(e) => setInstructions(e.target.value)}
-              className="w-full h-32 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition"
-              placeholder="Write detailed instructions for the students..."
-            ></textarea>
+            <label className="block text-xs font-bold tracking-wider text-white/60 mb-2">HOMEWORK DETAILS</label>
+            <textarea 
+              value={formData.homework} 
+              onChange={e => handleInputChange('homework', e.target.value)}
+              placeholder="Enter homework description..."
+              className="w-full p-3 h-32 bg-white/10 border-white/20 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 resize-y"
+            />
           </div>
 
-          {/* Submit Button */}
-          <button type="submit" className="w-full px-6 py-3 bg-[#FFD93D] text-black font-bold rounded-lg hover:bg-yellow-400 transition-all duration-300 shadow-[0_0_15px_rgba(255,217,61,0.4)] hover:shadow-[0_0_25px_rgba(255,217,61,0.6)] flex items-center justify-center gap-2">
-            <BookOpen size={20} />
-            Distribute Homework
-          </button>
+          <div className="relative">
+            <label className="block text-xs font-bold tracking-wider text-white/60 mb-2">DUE DATE (OPTIONAL)</label>
+            <input 
+              type="date" 
+              value={formData.dueDate} 
+              onChange={e => handleInputChange('dueDate', e.target.value)}
+              className="w-full p-3 bg-white/10 border-white/20 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 custom-date-input"
+            />
+          </div>
+
+          <Button type="submit" className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold text-base py-3 rounded-lg transition-all duration-300 shadow-lg shadow-yellow-400/20">
+            <Send size={20} className="mr-2"/>
+            Send Homework
+          </Button>
         </motion.form>
       </div>
     </>
   );
 }
 
-export default HomeworkSender;
+export default HomeworkSenderPage;

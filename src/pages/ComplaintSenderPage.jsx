@@ -1,10 +1,13 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { AlertTriangle } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 
 function ComplaintSenderPage() {
   const { toast } = useToast();
@@ -15,7 +18,6 @@ function ComplaintSenderPage() {
     description: '',
   });
 
-  const standards = ['LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
   const classes = ['A', 'B', 'C', 'D', 'E'];
   const students = ['Rohan', 'Priya', 'Amit', 'Sneha', 'Vikas']; // Example student list
 
@@ -57,34 +59,28 @@ function ComplaintSenderPage() {
                 <label className="block text-sm font-medium text-white/80 mb-2">
                   STANDARD *
                 </label>
-                <select
-                  value={formData.standard}
-                  onChange={(e) => setFormData({ ...formData, standard: e.target.value })}
-                  required
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-                >
-                  <option value="">Select Standard</option>
-                  {standards.map((std) => (
-                    <option key={std} value={std}>{std}</option>
-                  ))}
-                </select>
+                <Select value={formData.standard} onValueChange={value => setFormData({ ...formData, standard: value })}>
+                    <SelectTrigger className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300">
+                        <SelectValue placeholder="Select Standard" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {standards.map((std) => <SelectItem key={std} value={std}>{std}</SelectItem>)}
+                    </SelectContent>
+                </Select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-white/80 mb-2">
                   CLASS *
                 </label>
-                <select
-                  value={formData.class}
-                  onChange={(e) => setFormData({ ...formData, class: e.target.value })}
-                  required
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-                >
-                  <option value="">Select Class</option>
-                  {classes.map((cls) => (
-                    <option key={cls} value={cls}>{cls}</option>
-                  ))}
-                </select>
+                <Select value={formData.class} onValueChange={value => setFormData({ ...formData, class: value })}>
+                    <SelectTrigger className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300">
+                        <SelectValue placeholder="Select Class" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {classes.map((cls) => <SelectItem key={cls} value={cls}>{cls}</SelectItem>)}
+                    </SelectContent>
+                </Select>
               </div>
             </div>
             
@@ -92,17 +88,14 @@ function ComplaintSenderPage() {
               <label className="block text-sm font-medium text-white/80 mb-2">
                 STUDENT NAME *
               </label>
-              <select
-                value={formData.studentName}
-                onChange={(e) => setFormData({ ...formData, studentName: e.target.value })}
-                required
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-              >
-                <option value="">Select a student</option>
-                {students.map((student) => (
-                  <option key={student} value={student}>{student}</option>
-                ))}
-              </select>
+                <Select value={formData.studentName} onValueChange={value => setFormData({ ...formData, studentName: value })}>
+                    <SelectTrigger className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300">
+                        <SelectValue placeholder="Select a student" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {students.map((student) => <SelectItem key={student} value={student}>{student}</SelectItem>)}
+                    </SelectContent>
+                </Select>
             </div>
 
             <div>

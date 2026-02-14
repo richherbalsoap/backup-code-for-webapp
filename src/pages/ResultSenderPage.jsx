@@ -1,186 +1,174 @@
 
 import React, { useState } from 'react';
-import { Helmet } from 'react-helmet';
-import { motion } from 'framer-motion';
-import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
-import { Upload, Award } from 'lucide-react';
+import { Send, Upload, FileText, Trash2, ChevronDown, Check, AlertTriangle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
+import { useToast } from '@/components/ui/use-toast';
 
-function ResultSenderPage() {
+const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+
+const ResultSenderPage = () => {
   const { toast } = useToast();
+  const [studentName, setStudentName] = useState('');
   const [standard, setStandard] = useState('');
-  const [classSection, setClassSection] = useState('');
-  const [student, setStudent] = useState('');
-  const [subject, setSubject] = useState('');
-  const [obtainedMarks, setObtainedMarks] = useState('');
-  const [totalMarks, setTotalMarks] = useState('100');
-  const [resultPhoto, setResultPhoto] = useState(null);
+  const [section, setSection] = useState('');
+  const [file, setFile] = useState(null);
+  const [subjects, setSubjects] = useState([{ name: '', marks: '' }]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const standards = ['LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
-  const classes = ['A', 'B', 'C', 'D', 'E'];
-  const students = ['Rohan', 'Priya', 'Amit', 'Sneha', 'Vikas']; // Example data
-  const subjects = ['Mathematics', 'Science', 'English', 'History', 'Geography', 'Hindi']; // Example data
+  const handleSubjectChange = (index, field, value) => {
+    const newSubjects = [...subjects];
+    newSubjects[index][field] = value;
+    setSubjects(newSubjects);
+  };
 
+  const addSubject = () => {
+    setSubjects([...subjects, { name: '', marks: '' }]);
+  };
+
+  const removeSubject = (index) => {
+    const newSubjects = subjects.filter((_, i) => i !== index);
+    setSubjects(newSubjects);
+  };
 
   const handleFileChange = (e) => {
-    if (e.target.files.length > 0) {
-      setResultPhoto(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    if (selectedFile && selectedFile.size < 5 * 1024 * 1024) { // 5MB limit
+      setFile(selectedFile);
+    } else {
+      toast({
+        title: 'File Error',
+        description: 'File is too large or invalid. Max size: 5MB.',
+        variant: 'destructive',
+      });
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!standard || !classSection || !student || !subject || !obtainedMarks || !totalMarks) {
-        toast({
-            title: "Incomplete Form",
-            description: "Please fill all the required fields.",
-            variant: "destructive",
-        });
-        return;
+    if (!studentName || !standard || !section || (subjects.length === 1 && (!subjects[0].name || !subjects[0].marks)) && !file) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please fill all fields and add at least one subject or a file.',
+        variant: 'destructive',
+      });
+      return;
     }
+    setIsSubmitting(true);
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    console.log({ studentName, standard, section, subjects, file });
+
     toast({
-      title: "Result Published!",
-      description: `Result for ${student} in ${subject} has been published.`,
+      title: 'Result Sent Successfully!',
+      description: `Marks for ${studentName} (Class ${standard} ${section}) have been recorded.`,
     });
+
     // Reset form
+    setStudentName('');
     setStandard('');
-    setClassSection('');
-    setStudent('');
-    setSubject('');
-    setObtainedMarks('');
-    setTotalMarks('100');
-    setResultPhoto(null);
+    setSection('');
+    setFile(null);
+    setSubjects([{ name: '', marks: '' }]);
+    setIsSubmitting(false);
   };
 
   return (
     <>
       <Helmet>
-        <title>Publish Exam Results - Patanjali School System</title>
+        <title>Result Sender - Patanjali School System</title>
+        <meta name="description" content="Manually enter or upload student marks to be sent out." />
       </Helmet>
+      <div className="space-y-6 px-4 pb-10 relative z-10">
+        <div className="text-center pt-4">
+          <h1 className="text-3xl font-bold text-white">Result Sender</h1>
+          <p className="text-white/70">Enter or upload student marks</p>
+        </div>
 
-      <div className="space-y-6 relative z-10">
-        <h1 className="text-3xl font-bold text-white text-center">Publish Exam Results</h1>
-
-        <motion.div
+        <motion.form
+          onSubmit={handleSubmit}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-transparent backdrop-blur-md border border-white/10 rounded-xl p-6 max-w-2xl mx-auto"
+          className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 max-w-2xl mx-auto space-y-6"
         >
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-white/80 mb-2">STANDARD</label>
-                <select
-                  value={standard}
-                  onChange={(e) => setStandard(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-                >
-                  <option value="">Select Standard</option>
-                  {standards.map((std) => <option key={std} value={std}>{std}</option>)}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+             <div className="sm:col-span-3">
+                <label className="block text-xs font-bold tracking-wider text-white/60 mb-2">STUDENT NAME</label>
+                <input type="text" value={studentName} onChange={(e) => setStudentName(e.target.value)} placeholder="e.g., Rohan Kumar" className="w-full p-3 bg-white/10 border-white/20 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50" />
+            </div>
+            <div className="relative">
+                <label className="block text-xs font-bold tracking-wider text-white/60 mb-2">STANDARD</label>
+                <select value={standard} onChange={(e) => setStandard(e.target.value)} className="w-full appearance-none p-3 bg-white/10 border-white/20 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50">
+                    <option value="" disabled>Select Standard</option>
+                    {standards.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/80 mb-2">CLASS SECTION</label>
-                <select
-                  value={classSection}
-                  onChange={(e) => setClassSection(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-                >
-                  <option value="">Select Section</option>
-                  {classes.map((cls) => <option key={cls} value={cls}>{cls}</option>)}
+                <ChevronDown className="absolute right-3 bottom-3 w-5 h-5 text-white/50 pointer-events-none" />
+            </div>
+            <div className="relative">
+                 <label className="block text-xs font-bold tracking-wider text-white/60 mb-2">CLASS SECTION</label>
+                <select value={section} onChange={(e) => setSection(e.target.value)} className="w-full appearance-none p-3 bg-white/10 border-white/20 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50">
+                    <option value="" disabled>Select Section</option>
+                    {['A', 'B', 'C', 'D'].map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
-              </div>
+                <ChevronDown className="absolute right-3 bottom-3 w-5 h-5 text-white/50 pointer-events-none" />
             </div>
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">STUDENT</label>
-              <select
-                value={student}
-                onChange={(e) => setStudent(e.target.value)}
-                required
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-              >
-                <option value="">Select Student</option>
-                {students.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">SUBJECT</label>
-              <select
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                required
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-              >
-                <option value="">Select Subject</option>
-                {subjects.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label className="block text-sm font-medium text-white/80 mb-2">OBTAINED MARKS</label>
-                    <input
-                        type="number"
-                        value={obtainedMarks}
-                        onChange={(e) => setObtainedMarks(e.target.value)}
-                        required
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-                        placeholder="0"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-white/80 mb-2">TOTAL MARKS</label>
-                    <input
-                        type="number"
-                        value={totalMarks}
-                        onChange={(e) => setTotalMarks(e.target.value)}
-                        required
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#FFD93D]/50 transition-all duration-300"
-                        placeholder="100"
-                    />
-                </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-white/70 mb-2">RESULT PHOTO (OPTIONAL)</label>
-              <div className="relative w-full h-32 border-2 border-dashed border-white/20 rounded-lg flex flex-col justify-center items-center text-white/50 hover:border-white/40 transition-colors duration-300">
+          <div className="space-y-3">
+            <label className="block text-xs font-bold tracking-wider text-white/60">SUBJECTS & MARKS</label>
+            {subjects.map((subject, index) => (
+              <div key={index} className="flex items-center gap-3">
                 <input
-                  type="file"
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  onChange={handleFileChange}
-                  accept="image/*"
+                  type="text"
+                  value={subject.name}
+                  onChange={(e) => handleSubjectChange(index, 'name', e.target.value)}
+                  placeholder="Subject Name (e.g., Maths)"
+                  className="flex-1 p-3 bg-white/10 border-white/20 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50"
                 />
-                {resultPhoto ? (
-                  <div className="text-center text-white">
-                      <p className="font-semibold">{resultPhoto.name}</p>
-                      <p className="text-xs text-white/60">Click again or drop to replace</p>
-                  </div>
-                ) : (
-                  <div className="text-center">
-                      <Upload size={32} className="mx-auto mb-2" />
-                      <p>Click to upload result Image</p>
-                  </div>
-                )}
+                <input
+                  type="number"
+                  value={subject.marks}
+                  onChange={(e) => handleSubjectChange(index, 'marks', e.target.value)}
+                  placeholder="Marks"
+                  className="w-28 p-3 bg-white/10 border-white/20 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50"
+                />
+                <Button type="button" onClick={() => removeSubject(index)} variant="destructive" className="p-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30">
+                  <Trash2 size={16} />
+                </Button>
               </div>
+            ))}
+            <Button type="button" onClick={addSubject} className="text-white/80 hover:text-white bg-white/10 hover:bg-white/20 w-full">
+              + Add Another Subject
+            </Button>
+          </div>
+
+           <div className="text-center text-white/50 my-4 text-sm">OR</div>
+
+            <div>
+                <label className="block text-xs font-bold tracking-wider text-white/60 mb-2">UPLOAD RESULT FILE</label>
+                <div className="relative border-2 border-dashed border-white/20 rounded-lg p-6 text-center cursor-pointer hover:border-white/40 transition-colors">
+                    <input type="file" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0" accept=".pdf,.jpg,.png"/>
+                    <div className="flex flex-col items-center justify-center space-y-2 text-white/60">
+                        <Upload size={32}/>
+                        {file ? (
+                             <p>Selected file: {file.name}</p>
+                        ) : (
+                             <p>Click to upload (PDF, PNG, JPG)</p>
+                        )}
+                    </div>
+                </div>
             </div>
 
-            <Button
-              type="submit"
-              className="w-full bg-[#FFD93D] hover:bg-[#FFD93D]/90 text-black font-bold py-3 rounded-lg shadow-[0_0_20px_rgba(255,217,61,0.4)] hover:shadow-[0_0_30px_rgba(255,217,61,0.6)] transition-all duration-300 flex items-center justify-center gap-2"
-            >
-              <Award size={20} />
-              Publish Result
-            </Button>
-          </form>
-        </motion.div>
+          <Button type="submit" disabled={isSubmitting} className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold text-base py-3 rounded-lg transition-all duration-300 shadow-lg shadow-yellow-400/20">
+            {isSubmitting ? 'Submitting...' : <><Send size={20} className="mr-2" /> Send Result</>}
+          </Button>
+        </motion.form>
       </div>
     </>
   );
-}
+};
 
 export default ResultSenderPage;
