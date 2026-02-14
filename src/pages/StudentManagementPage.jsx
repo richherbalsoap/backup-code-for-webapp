@@ -8,6 +8,7 @@ import { Plus, Edit, Trash2, X, Upload, User, Phone } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+const sections = ['A', 'B', 'C', 'D']; // Define all possible sections
 
 const getSortableClassIndex = (classVal) => {
     const standard = classVal.replace('Class ', '');
@@ -149,7 +150,7 @@ const StudentModal = ({ isOpen, onClose, onSave, student }) => {
                             <SelectValue placeholder="Section" />
                         </SelectTrigger>
                         <SelectContent>
-                            {['A', 'B', 'C', 'D'].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                            {sections.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                         </SelectContent>
                     </Select>
                 </div>
@@ -180,7 +181,7 @@ function StudentManagementPage() {
   const handleEditStudent = (student) => {
     setEditingStudent(student);
     setIsModalOpen(true);
-  };
+  }$;
 
   const handleDeleteStudent = (id) => {
     setStudents(students.filter(s => s.id !== id));
@@ -199,8 +200,10 @@ function StudentManagementPage() {
     setIsModalOpen(false);
   };
   
-  const availableClasses = useMemo(() => [...new Set(students.map(s => `Class ${s.standard}`))].sort((a, b) => getSortableClassIndex(a) - getSortableClassIndex(b)), [students]);
-  const availableSections = useMemo(() => [...new Set(students.map(s => s.section))].sort(), [students]);
+  // Use the predefined standards and sections for filter options
+  const allAvailableClasses = useMemo(() => standards.map(s => `Class ${s}`).sort((a, b) => getSortableClassIndex(a) - getSortableClassIndex(b)), []);
+  const allAvailableSections = useMemo(() => [...sections].sort(), []);
+
 
   const filteredStudents = useMemo(() => {
       return students
@@ -254,7 +257,7 @@ function StudentManagementPage() {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="All Classes">All Classes</SelectItem>
-                            {availableClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                            {allAvailableClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                         </SelectContent>
                     </Select>
                 </div>
@@ -266,7 +269,7 @@ function StudentManagementPage() {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="All Sections">All Sections</SelectItem>
-                            {availableSections.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                            {allAvailableSections.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                         </SelectContent>
                     </Select>
                 </div>
